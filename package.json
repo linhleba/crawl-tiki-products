@@ -1,0 +1,24 @@
+{
+  "name": "crawl-tiki-products",
+  "version": "1.0.0",
+  "description": "This repository is used to crawl Laptop products on [Tiki.vn](https://tiki.vn).",
+  "main": "index.js",
+  "scripts": {
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/linhleba/crawl-tiki-products.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/linhleba/crawl-tiki-products/issues"
+  },
+  "homepage": "https://github.com/linhleba/crawl-tiki-products#readme",
+  "dependencies": {
+    "express": "^4.17.3",
+    "nodemon": "^2.0.15"
+  }
+}

@@ -3,12 +3,13 @@ import json
 import csv
 import re
 
-laptop_page_url = "https://tiki.vn/api/v2/products?limit=48&include=advertisement&aggregations=1&category=8095&page={}&urlKey=laptop"
+book_page_url = "https://tiki.vn/api/v2/products?limit=48&include=advertisement&aggregations=1&category=8322&page={}&urlKey=book"
 product_url = "https://tiki.vn/api/v2/products/{}"
 
 product_id_file = "./data/product-id.txt"
 product_data_file = "./data/product.txt"
 product_file = "./data/product.csv"
+json_product_file = "./data/product.json"
 
 headers = {"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.96 Safari/537.36"}
 
@@ -16,11 +17,13 @@ headers = {"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWe
 def crawl_product_id():
     product_list = []
     i = 1
-    while (True):
+    while (i == 1):
         print("Crawl page: ", i)
-        print(laptop_page_url.format(i))
-        response = requests.get(laptop_page_url.format(i), headers=headers)
+        print(book_page_url.format(i))
+        # pass address and headers
+        response = requests.get(book_page_url.format(i), headers=headers)
         
+        # if error, break
         if (response.status_code != 200):
             break
 
@@ -29,6 +32,7 @@ def crawl_product_id():
         if (len(products) == 0):
             break
 
+        # add product_id to product_list 
         for product in products:
             product_id = str(product["id"])
             print("Product ID: ", product_id)
@@ -38,6 +42,7 @@ def crawl_product_id():
 
     return product_list, i
 
+# func: insert productlist and save file product-id
 def save_product_id(product_list=[]):
     file = open(product_id_file, "w+")
     str = "\n".join(product_list)
@@ -45,8 +50,11 @@ def save_product_id(product_list=[]):
     file.close()
     print("Save file: ", product_id_file)
 
+
+# craw data by using product_url, loop all product and append it into product_detail_list
 def crawl_product(product_list=[]):
     product_detail_list = []
+    # product_list: list of ids
     for product_id in product_list:
         response = requests.get(product_url.format(product_id), headers=headers)
         if (response.status_code == 200):
@@ -54,10 +62,11 @@ def crawl_product(product_list=[]):
             print("Crawl product: ", product_id, ": ", response.status_code)
     return product_detail_list
 
-flatten_field = [ "badges", "inventory", "categories", "rating_summary", 
-                      "brand", "seller_specifications", "current_seller", "other_sellers", 
-                      "configurable_options",  "configurable_products", "specifications", "product_links",
-                      "services_and_promotions", "promotions", "stock_item", "installment_info" ]
+flatten_field = ["categories"]
+# "rating_summary", 
+#                       "badges", "inventory", "brand", "seller_specifications", "current_seller", "other_sellers", 
+#                       "configurable_options",  "configurable_products", "specifications", "product_links",
+#                       "services_and_promotions", "promotions", "stock_item", "installment_info" 
 
 def adjust_product(product):
     e = json.loads(product)
@@ -68,7 +77,15 @@ def adjust_product(product):
         if field in e:
             e[field] = json.dumps(e[field], ensure_ascii=False).replace('\n','')
 
-    return e
+    # handle get some properties (fixed)
+    jsonData = {
+        "id": e['id'],
+        "name": e['name'],
+        "prices": e['original_price'],
+        # "images": e['images']['small_url'],
+    }
+    # formatDataJson = jsonData.stringify(jsonData)
+    return jsonData
 
 def save_raw_product(product_detail_list=[]):
     file = open(product_data_file, "w+")
@@ -96,6 +113,10 @@ def save_product_list(product_json_list):
     file.close()
     print("Save file: ", product_file)
 
+def save_product_json_list(product_json_list):
+    file = open(json_product_file,"w")
+    json.dump(product_json_list, file)
+    # print("Save file: ", product_json_list)
 
 # crawl product id
 product_list, page = crawl_product_id()
@@ -117,6 +138,8 @@ save_raw_product(product_list)
 product_json_list = [adjust_product(p) for p in product_list]
 # save product to csv
 save_product_list(product_json_list)
+# save product to json file
+save_product_json_list(product_json_list)
 
 
 
