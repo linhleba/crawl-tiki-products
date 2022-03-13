@@ -9,7 +9,7 @@ let product = JSON.parse(rawdata);
 
 // const jsonData = require('./data/product.txt');
 
-let port = process.env.BE_PORT || 3000;
+let port = process.env.BE_PORT || 3001;
 
 // package for getting value in cookie
 // app.use(cookieParser());

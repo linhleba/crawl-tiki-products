@@ -17,7 +17,7 @@ headers = {"user-agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 11_1_0) AppleWe
 def crawl_product_id():
     product_list = []
     i = 1
-    while (i == 1):
+    while True:
         print("Crawl page: ", i)
         print(book_page_url.format(i))
         # pass address and headers
@@ -58,11 +58,12 @@ def crawl_product(product_list=[]):
     for product_id in product_list:
         response = requests.get(product_url.format(product_id), headers=headers)
         if (response.status_code == 200):
+            print(response);
             product_detail_list.append(response.text)
             print("Crawl product: ", product_id, ": ", response.status_code)
     return product_detail_list
 
-flatten_field = ["categories"]
+# flatten_field = ["categories"]
 # "rating_summary", 
 #                       "badges", "inventory", "brand", "seller_specifications", "current_seller", "other_sellers", 
 #                       "configurable_options",  "configurable_products", "specifications", "product_links",
@@ -73,16 +74,32 @@ def adjust_product(product):
     if not e.get("id", False):
         return None
 
-    for field in flatten_field:
-        if field in e:
-            e[field] = json.dumps(e[field], ensure_ascii=False).replace('\n','')
+    # for field in flatten_field:
+    #     if field in e:
+    #         e[field] = json.dumps(e[field], ensure_ascii=False).replace('\n','')
 
+    global categories
+    
+    categories = e['categories']['name']
+    try:
+        # for item in e['authors']:
+        #     name = item['name']
+        global authorLists
+        authorLists = e['authors'][0]['name']
+        # authorLists = authorLists.append(e['authors'][0]['name'])
+    except:
+        authorLists = "Chưa xác định"
     # handle get some properties (fixed)
     jsonData = {
         "id": e['id'],
         "name": e['name'],
         "prices": e['original_price'],
-        # "images": e['images']['small_url'],
+        "description": e['description'],
+        # "authors": e['authors']['name'],
+        "images": e['images'][0]['small_url'],
+        "categories": categories,
+        "authors": authorLists,
+        "prices": e['price']
     }
     # formatDataJson = jsonData.stringify(jsonData)
     return jsonData
@@ -125,15 +142,15 @@ print("No. Page: ", page)
 print("No. Product ID: ", len(product_list))
 
 # save product id for backup
-save_product_id(product_list)
+# save_product_id(product_list)
 
-# crawl detail for each product id
-product_list = crawl_product(product_list)
+# # crawl detail for each product id
+# product_list = crawl_product(product_list)
 
-# save product detail for backup
-save_raw_product(product_list)
+# # save product detail for backup
+# save_raw_product(product_list)
 
-# product_list = load_raw_product()
+product_list = load_raw_product()
 # flatten detail before converting to csv
 product_json_list = [adjust_product(p) for p in product_list]
 # save product to csv
