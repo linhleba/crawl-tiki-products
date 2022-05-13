@@ -35,8 +35,12 @@ export const checkAuthorExistence = async (authorList, author) => {
       console.log('author', res);
       authorId = res.data.id;
     });
+    console.log('author id: ', authorId);
+    return authorId;
+  } else {
+    console.log('author id: ', authorId);
+    return authorId;
   }
-  return authorId;
 };
 
 export const checkCategoryExistence = async (categoryList, category) => {
@@ -53,6 +57,10 @@ export const checkCategoryExistence = async (categoryList, category) => {
     await callAPI('api/category', 'post', { name: category }).then((res) => {
       categoryId = res.data.id;
     });
+    console.log('category id: ', categoryId);
+    return categoryId;
+  } else {
+    console.log('category id: ', categoryId);
+    return categoryId;
   }
-  return categoryId;
 };

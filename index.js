@@ -23,6 +23,9 @@ app.get('/', function (req, res) {
 
 app.post('/fillBook', async function (req, res) {
   // GET ALL AUTHOR AND SAVE
+  // setInterval(async () => {
+  //   console.log('ok');
+  // }, 5000);
   let authorDic = await BookService.getAuthor();
   // console.log(authorDic);
 
@@ -31,41 +34,95 @@ app.post('/fillBook', async function (req, res) {
 
   // handle each item in product and call post api to server
   Promise.all(
-    product.map(async (item) => {
-      // check the existence of author, category => handle and return categoryId
-      const authorId = await BookService.checkAuthorExistence(
-        authorDic,
-        item.authors,
-      );
+    product.forEach(async (item, index) => {
+      if (index > 632) {
+        console.log('index la', index);
+        await setInterval(async () => {
+          // check the existence of author, category => handle and return categoryId
+          const authorId = await BookService.checkAuthorExistence(
+            authorDic,
+            item.authors,
+          );
 
-      const categoryId = await BookService.checkCategoryExistence(
-        categoryDic,
-        item.categories,
-      );
-      console.log(categoryId);
+          const categoryId = await BookService.checkCategoryExistence(
+            categoryDic,
+            item.categories,
+          );
+          console.log(categoryId);
 
-      const payload = {
-        name: item.name,
-        description: item.description,
-        quantity: '12',
-        price: item.prices,
-        author_id: [authorId],
-        category_id: [categoryId],
-        image_url: item.images,
-      };
+          const payload = {
+            name: item.name,
+            description: item.description,
+            quantity: '12',
+            price: item.prices,
+            author_id: [authorId],
+            category_id: [categoryId],
+            image_url: item.images,
+          };
 
-      // post api to create book
-      setInterval(async () => {
-        console.log('posting book: ', payload.name);
-        await callAPI('api/book', 'post', payload).then((res) =>
-          console.log(res.status),
-        );
-      }, 5000);
+          // post api to create book
+          await setInterval(async () => {
+            console.log('posting book: ', payload.name);
+            await callAPI('api/book', 'post', payload).then((res) =>
+              console.log(res.status),
+            );
+          }, 1000);
+        }, 1000);
+      }
     }),
   );
   return {
     message: 'done for filling data',
   };
+});
+
+app.post('/fillBook2', async (req, res) => {
+  // let data = null;
+  // Promise.all(product.map((item, index) => {}));
+  // setInterval(() => {
+  //   console.log('ok', data);
+  // }, 2000);
+  let i = 730;
+  let authorDic = await BookService.getAuthor();
+  let categoryDic = await BookService.getCategory();
+
+  const b = setInterval(async () => {
+    if (i < product.length) {
+      const authorId = await BookService.checkAuthorExistence(
+        authorDic,
+        product[i].authors,
+      );
+
+      const categoryId = await BookService.checkCategoryExistence(
+        categoryDic,
+        product[i].categories,
+      );
+
+      const numRandom = Math.floor(Math.random() * 20) + 1;
+      const payload = {
+        name: product[i].name,
+        description: product[i].description,
+        quantity: numRandom,
+        price: product[i].prices,
+        author_id: [authorId],
+        category_id: [categoryId],
+        image_url: product[i].images,
+      };
+
+      // console.log('payload', payload);
+
+      console.log('posting book: ', payload.name);
+      await callAPI('api/book', 'post', payload).then((res) => {
+        console.log(res);
+        // console.log(res);
+        // console.log(res.data.message);
+      });
+      i++;
+      console.log('index: ', i);
+    } else {
+      clearInterval();
+    }
+  }, 500);
 });
 
 // app.use('/', routes);

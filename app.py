@@ -153,6 +153,7 @@ print("No. Product ID: ", len(product_list))
 product_list = load_raw_product()
 # flatten detail before converting to csv
 product_json_list = [adjust_product(p) for p in product_list]
+print(product_json_list)
 # save product to csv
 save_product_list(product_json_list)
 # save product to json file
